@@ -1,11 +1,29 @@
 const express = require('express');
-const app = express();
-const port = process.env.PORT || 3000;
+const axios = require('axios');
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK from Docker!' });
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send('API online!');
 });
 
-app.listen(port, () => {
-  console.log(`API rodando na porta ${port}`);
+app.get('/btc', async (req, res) => {
+  try {
+    const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+      params: {
+        ids: 'bitcoin',
+        vs_currencies: 'usd'
+      }
+    });
+    res.json({
+      bitcoin_usd: response.data.bitcoin.usd
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar o preço do Bitcoin' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
